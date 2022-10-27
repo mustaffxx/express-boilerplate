@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+  web:
+      build: .
+      container_name: express_boilerplate_container
+      command: yarn run dev
+      restart: always
+      volumes:
+        - app_data:/usr/app/
+        - /usr/app/node_modules
+      ports:
+        - "${APP_PORT}:${APP_PORT}"
+      depends_on:
+        - database
+      networks:
+        - appnetwork
+      env_file:
+        - .env
+  
+  database:
+    container_name: postgres_container
+    image: 'postgres:latest'
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    networks:
+      - appnetwork
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    restart: always
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - appnetwork
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "pgadmin@email.com"
+      PGADMIN_DEFAULT_PASSWORD: "pgadmin"
+
+volumes:
+  app_data:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  appnetwork:
+    driver: bridge
